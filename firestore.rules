@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// 部署：Firebase 控制台 → Firestore → 规则 → 粘贴发布
+// 访问控制：仅房主与第二位成员可读写；房间未满时允许尚未加入的匿名用户读取该文档（用于校验口令后加入）。
+// 安全性主要依赖 128 位随机房间号难以被猜到；请勿将房间链接公开发布。
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{roomId} {
+      function isHex32() {
+        return roomId.size() == 32 && roomId.matches('^[a-f0-9]+$');
+      }
+
+      function isMember() {
+        return request.auth != null && (
+          request.auth.uid == resource.data.hostUid ||
+          request.auth.uid == resource.data.guestUid
+        );
+      }
+
+      function hostUnchanged() {
+        return request.resource.data.hostUid == resource.data.hostUid;
+      }
+
+      allow read: if request.auth != null && isHex32() && (
+        isMember() || resource.data.guestUid == null
+      );
+
+      allow create: if request.auth != null && isHex32()
+        && request.resource.data.hostUid == request.auth.uid
+        && request.resource.data.guestUid == null;
+
+      allow update: if request.auth != null && isHex32() && hostUnchanged()
+        && (
+          (
+            resource.data.guestUid == null &&
+            request.resource.data.guestUid == request.auth.uid &&
+            request.auth.uid != resource.data.hostUid
+          )
+          || isMember()
+        );
+
+      allow delete: if request.auth != null && isHex32() && isMember();
+    }
+  }
+}

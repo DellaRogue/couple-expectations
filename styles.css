@@ -291,3 +291,68 @@ textarea {
 [hidden] {
   display: none !important;
 }
+
+.banner-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #fdeeee;
+  border: 1px solid #e8b4b4;
+  color: #6b2f2f;
+  font-size: 0.9rem;
+}
+
+.sep {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 1.25rem 0;
+}
+
+.bar-card {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.room-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.muted.tiny {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.room-code {
+  font-size: 0.95rem;
+  word-break: break-all;
+  color: var(--accent);
+}
+
+.tiny-btn {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  width: auto;
+}
+
+.wait-hint {
+  margin: 0.75rem 0 0;
+}
+
+.btn.secondary {
+  background: var(--bg-deep);
+  border-color: var(--line);
+  color: var(--ink);
+  width: 100%;
+}
+
+.btn.secondary:hover {
+  background: var(--line);
+}
+
