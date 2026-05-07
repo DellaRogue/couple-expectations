@@ -1,9 +1,21 @@
-/** 占位配置：请到 Firebase 控制台创建 Web 应用后替换为真实值（或将 firebase-config.example.js 复制覆盖本文件） */
-export const firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME",
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME",
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDhggNrOJIgA8kiI7gqgDji04kVE1rTPUA",
+  authDomain: "couple-expectation.firebaseapp.com",
+  projectId: "couple-expectation",
+  storageBucket: "couple-expectation.firebasestorage.app",
+  messagingSenderId: "861185260503",
+  appId: "1:861185260503:web:a7a7181d3e2d8663c2e992",
+  measurementId: "G-J4RKTPFEXS"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
