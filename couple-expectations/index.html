@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="双人预期对齐：异地实时同步，房间仅两人可进入，先各自写下预期再一起揭晓。" />
+    <title>预期对齐 · 双人盲填</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">关系里的小工具</p>
+        <h1>预期对齐</h1>
+        <p class="lede">
+          先各自写下对这件事的预期，双方都提交后再一起揭晓。支持<strong>异地实时同步</strong>：两人进入同一房间即可；预期内容在云端以加密形式保存，仅在揭晓步骤在本机解密展示。
+        </p>
+      </header>
+
+      <p id="banner-error" class="banner-error" hidden></p>
+
+      <section id="panel-lobby" class="panel card">
+        <h2>创建或加入房间</h2>
+        <p class="hint">
+          房间号用于关联两个人；<strong>共享口令</strong>用于校验身份与加密内容，请通过电话或当面约定，不要写在公开聊天里。
+        </p>
+        <label class="field">
+          <span>共享口令（两人使用同一句）</span>
+          <input
+            id="lobby-pass"
+            type="password"
+            maxlength="128"
+            autocomplete="new-password"
+            placeholder="建议 10 字以上，可以是你们独有的句子"
+          />
+        </label>
+        <button type="button" class="btn primary" id="btn-create-room">创建新房间（你是第一位）</button>
+        <hr class="sep" />
+        <label class="field">
+          <span>对方的房间号（32 位小写字母与数字）</span>
+          <input id="join-room-id" type="text" maxlength="32" autocomplete="off" placeholder="从对方复制的房间号" />
+        </label>
+        <label class="field">
+          <span>共享口令（与对方约定的一致）</span>
+          <input id="join-pass" type="password" maxlength="128" autocomplete="new-password" placeholder="同上" />
+        </label>
+        <button type="button" class="btn secondary" id="btn-join-room">加入房间（你是第二位）</button>
+      </section>
+
+      <section id="panel-room-bar" class="panel card bar-card" hidden>
+        <div class="room-bar">
+          <div>
+            <span class="muted tiny">当前房间</span>
+            <code id="display-room-id" class="room-code"></code>
+          </div>
+          <button type="button" class="btn ghost tiny-btn" id="btn-copy-room">复制房间号</button>
+        </div>
+        <p id="wait-guest-hint" class="hint wait-hint" hidden>
+          第二位尚未进入房间时，对方可用房间号 + 共享口令加入；请勿把链接发到公开网络。
+        </p>
+      </section>
+
+      <section id="panel-setup" class="panel card" hidden>
+        <h2>设定这一次的对话</h2>
+        <label class="field">
+          <span>我们要讨论的事</span>
+          <input
+            id="topic"
+            type="text"
+            maxlength="200"
+            placeholder="例如：这周末怎么安排 / 假期见家长的节奏"
+            autocomplete="off"
+          />
+        </label>
+        <div class="grid-two">
+          <label class="field">
+            <span>参与者 A 怎么称呼</span>
+            <input id="name-a" type="text" maxlength="40" placeholder="默认：参与者 A" autocomplete="nickname" />
+          </label>
+          <label class="field">
+            <span>参与者 B 怎么称呼</span>
+            <input id="name-b" type="text" maxlength="40" placeholder="默认：参与者 B" autocomplete="nickname" />
+          </label>
+        </div>
+        <p class="hint">任意一方修改都会实时同步到对方屏幕。</p>
+        <button type="button" class="btn primary" id="btn-start">开始 · 参与者 A 先写</button>
+      </section>
+
+      <section id="panel-a" class="panel card" hidden>
+        <p class="step-pill"><span id="label-name-a-step">参与者 A</span> · 私下写下预期</p>
+        <h2 id="heading-a">你的预期是？</h2>
+        <p class="subtle topic-inline">关于：<strong id="topic-display-a"></strong></p>
+        <label class="field">
+          <span>我希望的结果是…（具体一点更好）</span>
+          <textarea id="expect-a" rows="8" maxlength="4000" placeholder="可以说说你担心的点、底线、以及你最理想的样子。"></textarea>
+        </label>
+        <button type="button" class="btn primary" id="btn-submit-a">提交并锁定 · 交给下一位</button>
+      </section>
+
+      <section id="panel-wait-a" class="panel card" hidden>
+        <h2>等待对方</h2>
+        <p class="prose">当前轮到 <strong>参与者 A</strong> 私下书写预期，对方提交后这里会自动进入下一步。</p>
+      </section>
+
+      <section id="panel-after-a-host" class="panel card" hidden>
+        <h2>你已提交（参与者 A）</h2>
+        <p class="prose">
+          你的内容已加密同步。请等待 <span id="label-name-b-wait">参与者 B</span> 在 TA 的设备上点击「开始填写」。
+        </p>
+      </section>
+
+      <section id="panel-handoff" class="panel card" hidden>
+        <h2>轮到你了（参与者 B）</h2>
+        <p class="prose">
+          <span id="label-name-a-done">参与者 A</span> 的内容已加密保存，本页<strong>不会展示</strong>给任何人预习。
+        </p>
+        <p class="prose">点击下方按钮开始填写你自己的预期。</p>
+        <button type="button" class="btn primary" id="btn-continue-b"><span id="btn-text-continue-b">参与者 B 开始填写</span></button>
+      </section>
+
+      <section id="panel-b" class="panel card" hidden>
+        <p class="step-pill"><span id="label-name-b-step">参与者 B</span> · 私下写下预期</p>
+        <h2 id="heading-b">你的预期是？</h2>
+        <p class="subtle topic-inline">关于：<strong id="topic-display-b"></strong></p>
+        <label class="field">
+          <span>我希望的结果是…</span>
+          <textarea id="expect-b" rows="8" maxlength="4000" placeholder="同样，具体一点：你在乎什么、能接受什么、想要什么。"></textarea>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="confirm-privacy" />
+          <span>我已确认对方不会在旁边看到我输入的内容（或我已转过身 / 暂时离开屏幕）</span>
+        </label>
+        <button type="button" class="btn primary" id="btn-submit-b">双方都写好了 · 准备揭晓</button>
+      </section>
+
+      <section id="panel-wait-b" class="panel card" hidden>
+        <h2>等待对方</h2>
+        <p class="prose">当前轮到 <strong>参与者 B</strong> 私下书写预期。</p>
+      </section>
+
+      <section id="panel-reveal" class="panel card" hidden>
+        <h2>一起看见彼此</h2>
+        <p class="subtle topic-inline">关于：<strong id="topic-display-reveal"></strong></p>
+        <div class="reveal-grid">
+          <article class="reveal-card">
+            <h3 id="reveal-title-a"></h3>
+            <div class="reveal-body" id="reveal-text-a"></div>
+          </article>
+          <article class="reveal-card">
+            <h3 id="reveal-title-b"></h3>
+            <div class="reveal-body" id="reveal-text-b"></div>
+          </article>
+        </div>
+        <aside class="gentle">
+          <p>
+            接下来可以试着：各自指出<strong>一条</strong>对方文本里让你感到被在乎的地方，再说<strong>一条</strong>你希望微调的点。小步调整，比一次谈完更容易。
+          </p>
+        </aside>
+        <div class="actions-row">
+          <button type="button" class="btn ghost" id="btn-copy">复制全文摘要</button>
+          <button type="button" class="btn primary" id="btn-new">结束并离开房间</button>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <p>
+          使用 Firebase 同步与匿名登录；房间内数据仅存于你们的会话文档中。部署前请在 Firebase 控制台启用匿名登录并粘贴 Firestore 规则。
+        </p>
+      </footer>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
